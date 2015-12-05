@@ -1,5 +1,6 @@
 pub mod header;
 pub mod utils;
+pub mod content;
 
 pub mod spec {
     use storage::file::header::spec::FileHeaderSpec as FHS;
@@ -17,3 +18,4 @@ pub mod spec {
     }
 
 }
+
