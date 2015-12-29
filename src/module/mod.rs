@@ -16,6 +16,7 @@ use ui::file::FilePrinter;
 pub mod bm;
 pub mod helpers;
 pub mod notes;
+pub mod show;
 
 pub type Link = FileHash;
 

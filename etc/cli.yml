@@ -42,6 +42,51 @@ args:
         required: false
 
 subcommands:
+    - show:
+        about: Show the contents behind an ID
+        version: 0.1
+        author: Matthias Beyer <mail@beyermatthias.de>
+        args:
+            - id:
+                long: id
+                short: i
+                help: Show contents of this ID
+                required: false
+                takes_value: true
+
+            - match:
+                long: match
+                short: m
+                help: Show contents of files which match this regex
+                required: false
+                takes_value: true
+
+            - links:
+                long: links
+                help: Show links only, one link per line
+                required: false
+                takes_value: false
+
+            - meta:
+                long: meta
+                help: Show metadata of file, not contents
+                required: false
+                takes_value: false
+
+            - output_debug:
+                long: out-as-debug
+                short: d
+                help: Show contents as Debug output
+                required: false
+                takes_value: false
+
+            - output_json:
+                long: out-as-json
+                short: j
+                help: Show contents in JSON, if possible
+                required: false
+                takes_value: false
+
     - cal:
         about: Calendar module
         version: 0.1
