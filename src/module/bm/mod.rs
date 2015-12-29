@@ -1,5 +1,7 @@
 use std::fmt::{Debug, Formatter};
 use std::fmt;
+use std::rc::Rc;
+use std::cell::RefCell;
 use std::ops::Deref;
 
 use clap::ArgMatches;
@@ -7,6 +9,7 @@ use clap::ArgMatches;
 use runtime::Runtime;
 use module::{Link, Module};
 
+use storage::file::File;
 use storage::parser::FileHeaderParser;
 use storage::parser::Parser;
 use storage::json::parser::JsonHeaderParser;
@@ -14,6 +17,7 @@ use module::helpers::cli::create_tag_filter;
 use module::helpers::cli::create_hash_filter;
 use module::helpers::cli::create_text_header_field_grep_filter;
 use module::helpers::cli::CliFileFilter;
+use ui::file::FilePrinter;
 
 mod header;
 
@@ -342,6 +346,26 @@ impl<'a> Module<'a> for BM<'a> {
     fn links_in_file(&self, _: Rc<RefCell<File>>) -> Vec<Link> {
         debug!("Fetching links in file, though bookmarks cannot link");
         vec![]
+    }
+
+    fn print_file<P: FilePrinter>(&self, f: Rc<RefCell<File>>, p: P)
+        where Self: Sized
+    {
+        debug!("Printing file. As there is no content in bookmarks, printing nothing");
+        println!("");
+    }
+
+    fn print_links<P: FilePrinter>(&self, f: Rc<RefCell<File>>, p: P)
+        where Self: Sized
+    {
+        debug!("Printing links of file. As there are no links in bookmarks, printing nothing");
+        println!("");
+    }
+
+    fn print_meta<P: FilePrinter>(&self, f: Rc<RefCell<File>>, p: P)
+        where Self: Sized
+    {
+        unimplemented!()
     }
 
 }

@@ -13,7 +13,9 @@ use std::cell::RefCell;
 use clap::ArgMatches;
 
 use runtime::Runtime;
+use storage::file::File;
 use storage::file::hash::FileHash;
+use ui::file::FilePrinter;
 
 pub mod bm;
 pub mod helpers;
@@ -31,6 +33,18 @@ pub trait Module<'a> : Debug {
     fn runtime(&self) -> &Runtime;
 
     fn links_in_file(&self, Rc<RefCell<File>>) -> Vec<Link>;
+
+    fn print_file<P: FilePrinter>(&self, f: Rc<RefCell<File>>, p: P)
+        where Self: Sized
+    {
+        p.print_file(f);
+    }
+
+    fn print_links<P: FilePrinter>(&self, f: Rc<RefCell<File>>, p: P)
+        where Self: Sized;
+
+    fn print_meta<P: FilePrinter>(&self, f: Rc<RefCell<File>>, p: P)
+        where Self: Sized;
 
 }
 
