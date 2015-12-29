@@ -5,7 +5,7 @@ use std::ops::Deref;
 use clap::ArgMatches;
 
 use runtime::Runtime;
-use module::Module;
+use module::{Link, Module};
 
 use storage::parser::FileHeaderParser;
 use storage::parser::Parser;
@@ -338,6 +338,12 @@ impl<'a> Module<'a> for BM<'a> {
     fn runtime(&self) -> &Runtime {
         self.rt
     }
+
+    fn links_in_file(&self, _: Rc<RefCell<File>>) -> Vec<Link> {
+        debug!("Fetching links in file, though bookmarks cannot link");
+        vec![]
+    }
+
 }
 
 impl<'a> Debug for BM<'a> {
