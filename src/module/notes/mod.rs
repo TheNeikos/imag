@@ -8,7 +8,7 @@ use clap::ArgMatches;
 
 mod header;
 
-use module::Module;
+use module::{Module, StoreFileInterfaceModule};
 use runtime::Runtime;
 use storage::file::File;
 use storage::parser::Parser;
@@ -441,7 +441,7 @@ impl<'a> Notes<'a> {
 
 }
 
-impl<'a> Module<'a> for Notes<'a> {
+impl<'a> Module for Notes<'a> {
 
     fn exec(&self, matches: &ArgMatches) -> bool {
         use ansi_term::Colour::Red;

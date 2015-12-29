@@ -7,7 +7,7 @@ use std::ops::Deref;
 use clap::ArgMatches;
 
 use runtime::Runtime;
-use module::{Link, Module};
+use module::{Module, Link, StoreFileInterfaceModule};
 
 use storage::file::File;
 use storage::parser::FileHeaderParser;
@@ -294,7 +294,7 @@ impl<'a> BM<'a> {
 /**
  * Trait implementation for BM module
  */
-impl<'a> Module<'a> for BM<'a> {
+impl<'a> Module for BM<'a> {
 
     fn exec(&self, matches: &ArgMatches) -> bool {
         use ansi_term::Colour::Red;
@@ -342,6 +342,13 @@ impl<'a> Module<'a> for BM<'a> {
     fn runtime(&self) -> &Runtime {
         self.rt
     }
+
+}
+
+/**
+ * Trait implementation for BM module
+ */
+impl<'a> StoreFileInterfaceModule<'a> for BM<'a> {
 
     fn links_in_file(&self, _: Rc<RefCell<File>>) -> Vec<Link> {
         debug!("Fetching links in file, though bookmarks cannot link");

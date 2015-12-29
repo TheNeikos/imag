@@ -1,6 +1,3 @@
-<<<<<<< 670f0e16e9c118e49d82346428adbf2c2d796907
-use std::fmt::Debug;
-=======
 use std::collections::HashMap;
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
@@ -8,7 +5,6 @@ use std::fmt::Result as FMTResult;
 use std::result::Result;
 use std::rc::Rc;
 use std::cell::RefCell;
->>>>>>> Module trait: Add function to fetch links in a File
 
 use clap::ArgMatches;
 
@@ -26,11 +22,18 @@ pub type Link = FileHash;
 /**
  * Module interface, each module has to implement this.
  */
-pub trait Module<'a> : Debug {
+pub trait Module : Debug {
     fn exec(&self, matches: &ArgMatches) -> bool;
     fn name(&self) -> &'static str;
-
     fn runtime(&self) -> &Runtime;
+}
+
+/**
+ * Module interface, each module which is not a meta-module has to implement this.
+ *
+ * Meta-modules call modules and therefor don't need these functions
+ */
+pub trait StoreFileInterfaceModule<'a> : Module + Debug {
 
     fn links_in_file(&self, Rc<RefCell<File>>) -> Vec<Link>;
 

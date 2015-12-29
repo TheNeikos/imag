@@ -24,7 +24,7 @@ pub use cli::CliConfig;
 pub use configuration::Configuration;
 pub use runtime::{ImagLogger, Runtime};
 pub use clap::App;
-pub use module::Module;
+pub use module::{Module, StoreFileInterfaceModule};
 
 pub mod cli;
 pub mod configuration;
