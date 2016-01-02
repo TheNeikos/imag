@@ -30,7 +30,7 @@ struct Path<'a> {
     /*
      * The module
      */
-    module: &'a Module<'a>,
+    module: &'a Module,
 
     /*
      * The ID
@@ -43,7 +43,7 @@ struct Path<'a> {
 
 impl<'a> Path<'a> {
 
-    fn new(base: PathBuf, store: PathBuf, m: &'a Module<'a>, id: FileID) -> Path<'a> {
+    fn new(base: PathBuf, store: PathBuf, m: &'a Module, id: FileID) -> Path<'a> {
         Path {
             base:   base,
             store:  store,
@@ -54,7 +54,7 @@ impl<'a> Path<'a> {
         }
     }
 
-    fn new_with_idtype(base: PathBuf, store: PathBuf, m: &'a Module<'a>, id: FileIDType) -> Path<'a> {
+    fn new_with_idtype(base: PathBuf, store: PathBuf, m: &'a Module, id: FileIDType) -> Path<'a> {
         Path {
             base:   base,
             store:  store,
@@ -65,7 +65,7 @@ impl<'a> Path<'a> {
         }
     }
 
-    fn new_with_idhash(base: PathBuf, store: PathBuf, m: &'a Module<'a>, id: FileHash) -> Path<'a> {
+    fn new_with_idhash(base: PathBuf, store: PathBuf, m: &'a Module, id: FileHash) -> Path<'a> {
         Path {
             base:   base,
             store:  store,
