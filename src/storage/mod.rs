@@ -35,6 +35,16 @@ pub struct Store {
 impl Store {
 
     pub fn new(storepath: String) -> Store {
+        use std::fs::create_dir_all;
+        use std::process::exit;
+
+        create_dir_all(&storepath).unwrap_or_else(|e| {
+            error!("Could not create store: '{}'", &storepath);
+            error!("Error                 : '{}'", e);
+            error!("Killing myself now");
+            exit(1);
+        });
+
         Store {
             storepath: storepath,
             cache: RefCell::new(HashMap::new()),
@@ -173,8 +183,6 @@ impl Store {
             format!("{}/{}-{}.imag", self.storepath, file.owning_module_name, ids)
         };
 
-        self.ensure_store_path_exists();
-
         FSFile::create(&path).map(|mut fsfile| {
             fsfile.write_all(&text.unwrap().clone().into_bytes()[..])
         }).map_err(|writeerr|  {
@@ -183,23 +191,6 @@ impl Store {
         }).and(Ok(true)).unwrap()
 
         // TODO: Is this unwrap() save?
-    }
-
-    /**
-     * Helper to generate the store path
-     *
-     * Kills the program if it fails
-     */
-    fn ensure_store_path_exists(&self) {
-        use std::fs::create_dir_all;
-        use std::process::exit;
-
-        create_dir_all(&self.storepath).unwrap_or_else(|e| {
-            error!("Could not create store: '{}'", self.storepath);
-            error!("Error                 : '{}'", e);
-            error!("Killing myself now");
-            exit(1);
-        })
     }
 
     /**
@@ -436,12 +427,8 @@ mod test {
     #[test]
     fn test_store_creating() {
         use std::fs::read_dir;
-
         let store = build_store();
-        store.new_file(&TestModule::new());
-
         assert!(read_dir(test_store_path()).is_ok(), "Store path does not exist");
-
         finalize_store(store);
     }
 
