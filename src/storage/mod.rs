@@ -451,5 +451,33 @@ mod test {
         finalize_store(store);
     }
 
+    #[test]
+    fn test_creating_file_and_persisting() {
+        use std::fs::read_dir;
+        use storage::parser::Parser;
+        use storage::json::parser::JsonHeaderParser;
+
+        let store = build_store();
+
+        let m              = TestModule::new();
+        let p              = Parser::new(JsonHeaderParser::new(None));
+        let id             = store.new_file(&m);
+        let file           = store.load(&m, &p, &id).unwrap(); // or panic
+
+        let persist_worked = store.persist(&p, file);
+        assert!(persist_worked, "Persisting did not work");
+
+        let no_entries = read_dir(test_store_path())
+            .map(|walker| {
+                let cnt = walker.count();
+                println!("Entries found: {}", cnt);
+                cnt == 0
+            })
+            .unwrap_or(false);
+        assert!(no_entries, "One entry expected, more or less found");
+
+        finalize_store(store);
+    }
+
 }
 
