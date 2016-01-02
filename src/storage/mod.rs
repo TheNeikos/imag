@@ -369,3 +369,81 @@ impl Store {
     }
 
 }
+
+#[cfg(test)]
+mod test {
+    use std::fmt::{Debug, Formatter};
+    use std::fmt;
+
+    use module::Module;
+    use runtime::Runtime;
+    use storage::Store;
+
+    use clap::ArgMatches;
+
+    struct TestModule {
+        i: i32,
+    }
+
+    impl TestModule {
+        fn new() -> TestModule {
+            TestModule {
+                i: 1
+            }
+        }
+    }
+
+    impl Debug for TestModule {
+
+        fn fmt(&self, fmt: &mut Formatter) -> fmt::Result {
+            try!(write!(fmt, "TESTMODULE"));
+            Ok(())
+        }
+
+    }
+
+    impl<'a> Module<'a> for TestModule {
+
+        fn exec(&self, matches: &ArgMatches) -> bool {
+            unimplemented!()
+        }
+
+        fn name(&self) -> &'static str {
+            "testmodule"
+        }
+
+        fn runtime(&self) -> &Runtime {
+            unimplemented!()
+        }
+
+    }
+
+    fn test_store_path() -> &'static str {
+        "/tmp/test-store"
+    }
+
+    fn build_store() -> Store {
+        Store::new(String::from(test_store_path()))
+    }
+
+    fn finalize_store(s: Store) {
+        use std::fs::remove_dir_all;
+
+        assert!(test_store_path() == "/tmp/test-store"); // just to be sure
+        remove_dir_all(test_store_path());
+    }
+
+    #[test]
+    fn test_store_creating() {
+        use std::fs::read_dir;
+
+        let store = build_store();
+        store.new_file(&TestModule::new());
+
+        assert!(read_dir(test_store_path()).is_ok(), "Store path does not exist");
+
+        finalize_store(store);
+    }
+
+}
+
