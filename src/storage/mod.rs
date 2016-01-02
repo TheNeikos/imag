@@ -432,5 +432,24 @@ mod test {
         finalize_store(store);
     }
 
+    #[test]
+    fn test_creating_file() {
+        use std::fs::read_dir;
+
+        let store = build_store();
+
+        store.new_file(&TestModule::new());
+        let no_entries = read_dir(test_store_path())
+                            .map(|walker| {
+                                let cnt = walker.count();
+                                println!("Entries found: {}", cnt);
+                                cnt == 0
+                            })
+                            .unwrap_or(false);
+        assert!(no_entries, "No entries expected, entries found");
+
+        finalize_store(store);
+    }
+
 }
 
