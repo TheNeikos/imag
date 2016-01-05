@@ -124,6 +124,8 @@ impl<'a> Notes<'a> {
     fn command_show(&self, matches: &ArgMatches) -> bool {
         use self::header::get_name_from_header;
         use self::header::get_tags_from_header;
+        use ui::file::JsonPrinter;
+        use ui::file::FilePrinter;
 
         let parser  = Parser::new(JsonHeaderParser::new(None));
 
@@ -150,6 +152,10 @@ impl<'a> Notes<'a> {
                 let text = if matches.is_present("plain") {
                     parser.write((file.deref().borrow().header(), &content))
                           .unwrap_or(format!("Parser error for file: {}", file.deref().borrow().id()))
+                } else if matches.is_present("json") {
+                    let printer = JsonPrinter::new(self.rt.is_verbose(), self.rt.is_debugging());
+                    printer.print_file(file);
+                    String::from("")
                 } else {
                     let tags = get_tags_from_header(file.deref().borrow().header());
                     let name = get_name_from_header(file.deref().borrow().header());

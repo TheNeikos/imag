@@ -326,6 +326,13 @@ subcommands:
                         required: false
                         takes_value: false
 
+                    - json:
+                        long: json
+                        short: j
+                        help: Show notes as json
+                        required: false
+                        takes_value: false
+
                     - id:
                         long: id
                         help: Open note with this ID
