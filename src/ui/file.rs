@@ -4,6 +4,7 @@ use std::rc::Rc;
 use std::ops::Deref;
 
 use storage::file::File;
+use storage::file::header::data::FileHeaderData;
 
 /**
  * Trait for a printer which can be used to print data from files
@@ -209,6 +210,62 @@ impl FilePrinter for TablePrinter {
         } else {
             debug!("Not printing table because there are zero entries");
         }
+    }
+
+}
+
+pub struct JsonPrinter {
+    verbose:    bool,
+    debug:      bool,
+}
+
+impl JsonPrinter {
+
+    fn header_to_string(&self, header: FileHeaderData) -> String {
+        use serde_json::Serializer;
+        use serde::ser::Serialize;
+
+        let mut s = Vec::<u8>::new();
+        {
+            let mut ser = Serializer::pretty(&mut s);
+            header.serialize(&mut ser).map_err(|e| {
+                debug!("Serializer error: {:?}", e);
+            }).ok();
+        }
+
+        String::from_utf8(s).unwrap_or(String::from("'Header parser Error'"))
+    }
+
+    fn embed_into_json(&self, header: FileHeaderData, content: String) -> String {
+        format!("{} 'HEADER': {}, 'CONTENT': '{}' {}", "{",
+                self.header_to_string(header), content, "}")
+    }
+
+}
+
+impl FilePrinter for JsonPrinter {
+
+    fn new(verbose: bool, debug: bool) -> JsonPrinter {
+        JsonPrinter {
+            verbose: verbose,
+            debug: debug,
+        }
+    }
+
+    /*
+     * Print a single file
+     */
+    fn print_file(&self, file: Rc<RefCell<File>>) {
+        let hdr = file.deref().borrow().header().clone();
+        let cnt = file.deref().borrow().data().clone();
+        println!("{}", self.embed_into_json(hdr, cnt));
+    }
+
+    fn print_file_custom<F>(&self, file: Rc<RefCell<File>>, f: &F)
+        where F: Fn(Rc<RefCell<File>>) -> Vec<String>
+    {
+        let hdr = file.deref().borrow().header().clone();
+        println!("{}", self.embed_into_json(hdr, f(file).join(" ")));
     }
 
 }
