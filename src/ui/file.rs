@@ -144,7 +144,7 @@ impl FilePrinter for TablePrinter {
         use prettytable::row::Row;
         use prettytable::cell::Cell;
 
-        let titles = row!["File#", "Owner", "ID"];
+        let titles = row!["File#", "Owner", "ID-Type", "ID"];
 
         let mut tab = Table::new();
         tab.set_titles(titles);
@@ -156,9 +156,11 @@ impl FilePrinter for TablePrinter {
             let cell_i  = Cell::new(&format!("{}", i)[..]);
             let cell_o  = Cell::new(&format!("{}", file.deref().borrow().owner_name())[..]);
 
-            let id : String = file.deref().borrow().id().clone().into();
-            let cell_id = Cell::new(&id[..]);
-            let row = Row::new(vec![cell_i, cell_o, cell_id]);
+            let id_type : String = file.deref().borrow().id().get_type().into();
+            let id_hash : String = file.deref().borrow().id().get_id().into();
+            let cell_id_type = Cell::new(&id_type[..]);
+            let cell_id_hash = Cell::new(&id_hash[..]);
+            let row = Row::new(vec![cell_i, cell_o, cell_id_type, cell_id_hash]);
             tab.add_row(row);
         }
 
@@ -178,7 +180,7 @@ impl FilePrinter for TablePrinter {
         use prettytable::row::Row;
         use prettytable::cell::Cell;
 
-        let titles = row!["#", "Module", "ID", "..."];
+        let titles = row!["#", "Module", "ID-Type", "ID", "..."];
 
         let mut tab = Table::new();
         tab.set_titles(titles);
@@ -190,10 +192,12 @@ impl FilePrinter for TablePrinter {
             let cell_i  = Cell::new(&format!("{}", i)[..]);
             let cell_o  = Cell::new(&format!("{}", file.deref().borrow().owner_name())[..]);
 
-            let id : String = file.deref().borrow().id().clone().into();
-            let cell_id = Cell::new(&id[..]);
+            let id_type : String = file.deref().borrow().id().get_type().into();
+            let id_hash : String = file.deref().borrow().id().get_id().into();
+            let cell_id_type = Cell::new(&id_type[..]);
+            let cell_id_hash = Cell::new(&id_hash[..]);
 
-            let mut row = Row::new(vec![cell_i, cell_o, cell_id]);
+            let mut row = Row::new(vec![cell_i, cell_o, cell_id_type, cell_id_hash]);
 
             for cell in f(file).iter() {
                 debug!("Adding custom cell: {:?}", cell);
