@@ -132,7 +132,8 @@ impl<'a> BM<'a> {
             .filter(|file| filter.filter_file(file));
         let printer = TablePrinter::new(self.rt.is_verbose(), self.rt.is_debugging());
 
-        printer.print_files_custom(files,
+        let additional_headers = vec!["URL", "Tags"].into_iter().map(String::from).collect();
+        printer.print_files_custom(additional_headers, files,
             &|file| {
                 let fl = file.deref().borrow();
                 let hdr = fl.header();

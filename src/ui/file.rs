@@ -32,7 +32,7 @@ pub trait FilePrinter {
         info!("{}", f(file).join(" "));
     }
 
-    fn print_files_custom<F, I>(&self, files: I, f: &F)
+    fn print_files_custom<F, I>(&self, _: Vec<String>, files: I, f: &F)
         where I: Iterator<Item = Rc<RefCell<File>>>,
               F: Fn(Rc<RefCell<File>>) -> Vec<String>
     {
@@ -172,7 +172,7 @@ impl FilePrinter for TablePrinter {
         }
     }
 
-    fn print_files_custom<F, I>(&self, files: I, f: &F)
+    fn print_files_custom<F, I>(&self, additional_headers: Vec<String>, files: I, f: &F)
         where I: Iterator<Item = Rc<RefCell<File>>>,
               F: Fn(Rc<RefCell<File>>) -> Vec<String>
     {
@@ -180,7 +180,14 @@ impl FilePrinter for TablePrinter {
         use prettytable::row::Row;
         use prettytable::cell::Cell;
 
-        let titles = row!["#", "Module", "ID-Type", "ID", "..."];
+        let titles = {
+            let mut ts : Vec<String> = vec!["#", "Module", "ID-Type", "ID"]
+                .into_iter()
+                .map(String::from)
+                .collect();
+            ts.append(&mut additional_headers.clone());
+            Row::new(ts.into_iter().map(|s| Cell::new(&s[..])).collect())
+        };
 
         let mut tab = Table::new();
         tab.set_titles(titles);

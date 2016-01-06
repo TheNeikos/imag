@@ -276,7 +276,9 @@ impl<'a> Notes<'a> {
 
         let printer = TablePrinter::new(self.rt.is_verbose(), self.rt.is_debugging());
 
+        let additional_headers = vec!["Name", "Tags"].into_iter().map(String::from).collect();
         printer.print_files_custom(
+            additional_headers,
             self.rt.store()
                     .load_for_module(self, &self.parser)
                     .into_iter()
