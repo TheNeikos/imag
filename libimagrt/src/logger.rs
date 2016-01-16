@@ -23,7 +23,7 @@ impl Log for ImagLogger {
     fn log(&self, record: &LogRecord) {
         if self.enabled(record.metadata()) {
             // TODO: This is just simple logging. Maybe we can enhance this lateron
-            println!("[{}]: {}", record.level(), record.args());
+            println!("[imag][{: <5}]: {}", record.level(), record.args());
         }
     }
 }
