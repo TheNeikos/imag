@@ -96,7 +96,7 @@ impl<'a> Runtime<'a> {
             debug!("Init logger with {}", lvl);
             Box::new(ImagLogger::new(lvl.to_log_level().unwrap()))
         })
-        .map_err(|e| {
+        .map_err(|_| {
             panic!("Could not setup logger");
         });
     }
