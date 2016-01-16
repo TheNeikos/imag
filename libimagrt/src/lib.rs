@@ -98,7 +98,8 @@ impl<'a> Runtime<'a> {
         })
         .map_err(|_| {
             panic!("Could not setup logger");
-        });
+        })
+        .ok();
     }
 
     pub fn is_verbose(&self) -> bool {
