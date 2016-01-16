@@ -1,10 +1,8 @@
 use std::fmt::{Debug, Formatter, Error};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 pub use config::types::Config;
 pub use config::reader::from_file;
-
-use log;
 
 pub struct Configuration {
     pub verbosity: bool,

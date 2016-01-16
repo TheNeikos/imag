@@ -1,4 +1,4 @@
-use log::{Log, LogLevel, LogLevelFilter, LogRecord, LogMetadata};
+use log::{Log, LogLevel, LogRecord, LogMetadata};
 
 pub struct ImagLogger {
     lvl: LogLevel,
