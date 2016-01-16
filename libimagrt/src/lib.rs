@@ -4,42 +4,16 @@ extern crate clap;
 extern crate config;
 
 mod configuration;
+mod logger;
 
 use std::path::PathBuf;
 
 pub use clap::App;
+use log::LogLevelFilter;
 
 use clap::{Arg, ArgMatches};
-use log::{LogLevel, LogLevelFilter, LogRecord, LogMetadata};
 use configuration::Configuration;
-
-struct ImagLogger {
-    lvl: LogLevel,
-}
-
-impl ImagLogger {
-
-    pub fn new(lvl: LogLevel) -> ImagLogger {
-        ImagLogger {
-            lvl: lvl,
-        }
-    }
-
-}
-
-impl log::Log for ImagLogger {
-
-    fn enabled(&self, metadata: &LogMetadata) -> bool {
-        metadata.level() <= self.lvl
-    }
-
-    fn log(&self, record: &LogRecord) {
-        if self.enabled(record.metadata()) {
-            // TODO: This is just simple logging. Maybe we can enhance this lateron
-            println!("[{}]: {}", record.level(), record.args());
-        }
-    }
-}
+use logger::ImagLogger;
 
 pub struct Runtime<'a> {
     rtp: PathBuf,
