@@ -358,9 +358,15 @@ fn verify_header_consistency(t: Table) -> EntryResult<Table> {
         Err(ParserError::new(ParserErrorKind::MissingMainSection, None))
     } else if !has_imag_version_in_main_section(&t) {
         Err(ParserError::new(ParserErrorKind::MissingVersionInfo, None))
+    } else if !has_only_tables(&t) {
+        Err(ParserError::new(ParserErrorKind::NonTableInBaseTable, None))
     } else {
         Ok(t)
     }
+}
+
+fn has_only_tables(t: &Table) -> bool {
+    t.iter().fold(true, |_, (_, x)| if let &Value::Table(_) = x { true } else { false })
 }
 
 fn has_main_section(t: &Table) -> bool {
