@@ -15,6 +15,7 @@ use std::ops::DerefMut;
 use std::fmt::Formatter;
 use std::fmt::Debug;
 use std::fmt::Error as FMTError;
+use std::default::Default;
 
 use toml::{Table, Value};
 use regex::Regex;
@@ -40,6 +41,8 @@ use libimagerror::into::IntoError;
 use libimagutil::iter::FoldResult;
 
 use self::glob_store_iter::*;
+
+use driver::StoreDriver;
 
 /// The Result Type returned by any interaction with the store that could fail
 pub type Result<T> = RResult<T, SE>;
@@ -196,6 +199,9 @@ pub struct Store {
      * Could be optimized for a threadsafe HashMap
      */
     entries: Arc<RwLock<HashMap<StoreId, StoreEntry>>>,
+
+
+    driver: StoreDriver,
 }
 
 impl Store {
@@ -306,6 +312,9 @@ impl Store {
             pre_move_aspects    : Arc::new(Mutex::new(pre_move_aspects)),
             post_move_aspects   : Arc::new(Mutex::new(post_move_aspects)),
             entries: Arc::new(RwLock::new(HashMap::new())),
+
+
+            driver: Default::default(),
         };
 
         debug!("Store building succeeded");

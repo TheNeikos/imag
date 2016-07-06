@@ -33,4 +33,5 @@ pub mod hook;
 pub mod store;
 mod configuration;
 mod lazyfile;
+mod driver;
 
