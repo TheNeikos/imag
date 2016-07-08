@@ -1,12 +1,12 @@
 use std::collections::HashMap;
-use std::fs::{File, remove_file};
+use std::fs::remove_file;
 use std::ops::Drop;
 use std::path::PathBuf;
 use std::result::Result as RResult;
 use std::sync::Arc;
 use std::sync::RwLock;
 use std::collections::BTreeMap;
-use std::io::{Seek, SeekFrom};
+use std::io::{Seek, SeekFrom, Read};
 use std::convert::From;
 use std::convert::Into;
 use std::sync::Mutex;
@@ -1359,9 +1359,8 @@ impl Entry {
         }
     }
 
-    pub fn from_file<S: IntoStoreId>(loc: S, file: &mut File) -> Result<Entry> {
+    pub fn from_file<S: IntoStoreId>(loc: S, file: &mut Read) -> Result<Entry> {
         let text = {
-            use std::io::Read;
             let mut s = String::new();
             try!(file.read_to_string(&mut s));
             s
