@@ -1,12 +1,11 @@
 use std::collections::HashMap;
-use std::fs::remove_file;
 use std::ops::Drop;
 use std::path::PathBuf;
 use std::result::Result as RResult;
 use std::sync::Arc;
 use std::sync::RwLock;
 use std::collections::BTreeMap;
-use std::io::{Seek, SeekFrom, Read};
+use std::io::Read;
 use std::convert::From;
 use std::convert::Into;
 use std::sync::Mutex;
@@ -15,7 +14,6 @@ use std::ops::DerefMut;
 use std::fmt::Formatter;
 use std::fmt::Debug;
 use std::fmt::Error as FMTError;
-use std::default::Default;
 
 use toml::{Table, Value};
 use regex::Regex;
@@ -41,8 +39,6 @@ use libimagerror::into::IntoError;
 use libimagutil::iter::FoldResult;
 
 use self::glob_store_iter::*;
-
-use driver::StoreDriver;
 
 /// The Result Type returned by any interaction with the store that could fail
 pub type Result<T> = RResult<T, SE>;
@@ -143,7 +139,6 @@ impl StoreEntry {
                 // TODO:
                 let mut file = file.unwrap();
                 let entry = Entry::from_file(self.id.clone(), &mut file);
-                file.seek(SeekFrom::Start(0)).ok();
                 entry
             }
         } else {
@@ -153,11 +148,11 @@ impl StoreEntry {
 
     fn write_entry(&mut self, entry: &Entry) -> Result<()> {
         if self.is_borrowed() {
-            use std::io::Write;
             let file = try!(self.file.create_file());
 
             assert_eq!(self.id, entry.location);
-            try!(file.set_len(0).map_err_into(SEK::FileError));
+
+            try!(file.trim().map_err_into(SEK::FileError));
             file.write_all(entry.to_str().as_bytes()).map_err_into(SEK::FileError)
         } else {
             Ok(())
@@ -199,9 +194,6 @@ pub struct Store {
      * Could be optimized for a threadsafe HashMap
      */
     entries: Arc<RwLock<HashMap<StoreId, StoreEntry>>>,
-
-
-    driver: StoreDriver,
 }
 
 impl Store {
@@ -312,9 +304,6 @@ impl Store {
             pre_move_aspects    : Arc::new(Mutex::new(pre_move_aspects)),
             post_move_aspects   : Arc::new(Mutex::new(post_move_aspects)),
             entries: Arc::new(RwLock::new(HashMap::new())),
-
-
-            driver: Default::default(),
         };
 
         debug!("Store building succeeded");
@@ -560,7 +549,7 @@ impl Store {
 
         // remove the entry first, then the file
         entries.remove(&id);
-        if let Err(e) = remove_file(&id) {
+        if let Err(e) = LazyFile::Absent(id.clone().into()).remove() {
             return Err(SEK::FileError.into_error_with_cause(Box::new(e)))
                 .map_err_into(SEK::DeleteCallError);
         }
@@ -587,9 +576,6 @@ impl Store {
     fn save_to_other_location(&self, entry: &FileLockEntry, new_id: StoreId, remove_old: bool)
         -> Result<()>
     {
-        use std::fs::copy;
-        use std::fs::remove_file;
-
         let new_id = new_id.storified(self);
         let hsmap = self.entries.write();
         if hsmap.is_err() {
@@ -599,16 +585,9 @@ impl Store {
             return Err(SE::new(SEK::EntryAlreadyExists, None)).map_err_into(SEK::MoveCallError)
         }
 
-        let old_id = entry.get_location().clone();
+        let mut old_id = LazyFile::Absent(entry.get_location().clone().into());
 
-        copy(old_id.clone(), new_id.clone())
-            .and_then(|_| {
-                if remove_old {
-                    remove_file(old_id)
-                } else {
-                    Ok(())
-                }
-            })
+        old_id.move_to(&new_id, remove_old)
             .map_err_into(SEK::FileError)
             .and_then(|_| self.execute_hooks_for_id(self.post_move_aspects.clone(), &new_id)
                     .map_err_into(SEK::PostHookExecuteError)

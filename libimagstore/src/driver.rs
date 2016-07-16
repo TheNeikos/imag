@@ -2,32 +2,22 @@
 use std::default::Default;
 
 #[cfg(not(test))]
-pub type StoreDriver = InnerDriver<IoDriver>;
+pub type StoreDriver = IoDriver;
 
 #[cfg(test)]
-pub type StoreDriver = InnerDriver<TestDriver>;
-
-pub struct InnerDriver<I>
-    where I: DriverImpl
-{
-    imp: I,
-}
+pub type StoreDriver = TestDriver;
 
 #[cfg(not(test))]
 impl Default for StoreDriver {
     fn default() -> StoreDriver {
-        StoreDriver {
-            imp: IoDriver,
-        }
+        StoreDriver { }
     }
 }
 
 #[cfg(test)]
 impl Default for StoreDriver {
     fn default() -> StoreDriver {
-        StoreDriver {
-            imp: TestDriver,
-        }
+        StoreDriver { }
     }
 }
 
