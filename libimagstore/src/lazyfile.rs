@@ -1,7 +1,10 @@
 use error::{MapErrInto, StoreError as SE, StoreErrorKind as SEK};
 use std::io::{self, Seek, SeekFrom, Read, Write};
-use std::path::{Path, PathBuf};
-use std::fs::{File, OpenOptions, create_dir_all, copy, remove_file};
+use std::path::PathBuf;
+use std::fs::File;
+use std::default::Default;
+
+use driver::{StoreDriver, DriverImpl};
 
 pub trait FileOps : Read + Write {
     fn trim(&mut self) -> io::Result<()> {
@@ -24,20 +27,6 @@ pub enum LazyFile {
     File(File, PathBuf)
 }
 
-fn open_file<A: AsRef<Path>>(p: A) -> io::Result<File> {
-    OpenOptions::new().write(true).read(true).open(p)
-}
-
-fn create_file<A: AsRef<Path>>(p: A) -> io::Result<File> {
-    if let Some(parent) = p.as_ref().parent() {
-        debug!("Implicitely creating directory: {:?}", parent);
-        if let Err(e) = create_dir_all(parent) {
-            return Err(e);
-        }
-    }
-    OpenOptions::new().write(true).read(true).create(true).open(p)
-}
-
 impl LazyFile {
 
     /**
@@ -53,7 +42,8 @@ impl LazyFile {
                     .map_err_into(SEK::FileNotCreated)
                     .map(|_| f as &mut FileOps)
             },
-            LazyFile::Absent(ref p) => try!(open_file(p).map_err_into(SEK::FileNotFound)),
+            LazyFile::Absent(ref p) =>
+                try!(StoreDriver::default().open_file(p).map_err_into(SEK::FileNotFound)),
         };
 
         let path;
@@ -77,7 +67,8 @@ impl LazyFile {
         debug!("Creating lazy file: {:?}", self);
         let file = match *self {
             LazyFile::File(ref mut f, _) => return Ok(f),
-            LazyFile::Absent(ref p) => try!(create_file(p).map_err_into(SEK::FileNotFound)),
+            LazyFile::Absent(ref p) =>
+                try!(StoreDriver::default().create_file(p).map_err_into(SEK::FileNotFound)),
         };
 
         let path;
@@ -100,10 +91,10 @@ impl LazyFile {
             LazyFile::Absent(ref p) => p.clone()
         };
 
-        let ret = try!(copy(&path, new_path));
+        let ret = try!(StoreDriver::default().copy(&path, new_path));
 
         if remove {
-            try!(remove_file(&path));
+            try!(StoreDriver::default().remove_file(&path));
         }
 
         *self = match *self {
@@ -116,8 +107,8 @@ impl LazyFile {
 
     pub fn remove(&mut self) -> Result<(), SE> {
         try!(match *self {
-            LazyFile::File(_, ref p) => remove_file(p),
-            LazyFile::Absent(ref p) => remove_file(p),
+            LazyFile::File(_, ref p) => StoreDriver::default().remove_file(p),
+            LazyFile::Absent(ref p) => StoreDriver::default().remove_file(p),
         });
         Ok(())
     }
